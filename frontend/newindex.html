@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotion Recognition</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .card {
+            margin: 40px auto;
+            padding: 30px;
+            max-width: 600px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        #uploaded-image {
+            max-width: 150px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+
+        .prediction-result {
+            margin-top: 30px;
+            font-size: 20px;
+            font-weight: 500;
+        }
+
+        .btn-predict {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+        }
+
+        .btn-predict:hover {
+            background-color: #45a049;
+        }
+
+        .no-result-box {
+            background-color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+            box-shadow: 0px 1px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Emotion Recognition</div>
+
+    <div class="card bg-white text-center">
+        <h4 class="mb-4">Upload Image for Emotion Recognition</h4>
+        <form id="upload-form" enctype="multipart/form-data">
+            <input type="file" id="image-upload" name="image" class="form-control mb-3" accept="image/*" required>
+            <button type="submit" class="btn btn-predict">Predict Emotion</button>
+        </form>
+
+        <div class="mt-4">
+            <h5>Uploaded Image:</h5>
+            <img id="uploaded-image" src="" alt="No image uploaded">
+        </div>
+
+        <div class="prediction-result">
+            <h5>Prediction Result</h5>
+            <div id="result" class="no-result-box">No result yet</div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const imageUpload = document.getElementById('image-upload');
+        const uploadedImage = document.getElementById('uploaded-image');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const file = imageUpload.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Show the uploaded image preview
+            uploadedImage.src = URL.createObjectURL(file);
+
+            resultDiv.innerText = "Processing...";
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                resultDiv.innerText = `Emotion: ${result.emotion}, Confidence: ${result.confidence.toFixed(2)}%`;
+            } catch (error) {
+                console.error(error);
+                resultDiv.innerText = "Prediction failed. Please try again.";
+            }
+        });
+    </script>
+</body>
+</html>
